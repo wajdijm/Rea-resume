@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Réanimation — Plateforme de Révision Médicale</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=Lora:ital,wght@0,400;1,400;1,600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#07090f;--s1:#0e1220;--s2:#161b2e;--s3:#1d2340;--b1:rgba(99,179,237,.12);--b2:rgba(99,179,237,.25);--a1:#63b3ed;--a2:#f6ad55;--a3:#68d391;--a4:#fc8181;--a5:#b794f4;--a6:#76e4f7;--tx:#e2e8f0;--tx2:#a0aec0;--mt:#4a5568}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--tx);font-family:'DM Mono',monospace;min-height:100vh;overflow-x:hidden;font-size:14px}
+body::before{content:'';position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(99,179,237,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(99,179,237,.025) 1px,transparent 1px);background-size:40px 40px;pointer-events:none}
+body::after{content:'';position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse 70% 50% at 15% 10%,rgba(99,179,237,.07) 0%,transparent 60%),radial-gradient(ellipse 50% 70% at 85% 90%,rgba(183,148,244,.07) 0%,transparent 60%);pointer-events:none}
+
+/* HEADER */
+header{position:sticky;top:0;z-index:200;background:rgba(7,9,15,.93);backdrop-filter:blur(24px);border-bottom:1px solid var(--b1);padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:58px}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:.95rem;color:var(--a1);display:flex;align-items:center;gap:10px}
+.pulse{width:8px;height:8px;background:var(--a4);border-radius:50%;animation:pulse 2s infinite;flex-shrink:0}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(252,129,129,.5)}50%{box-shadow:0 0 0 7px rgba(252,129,129,0)}}
+.hdr-r{display:flex;align-items:center;gap:10px}
+.sc-badge{font-size:.68rem;color:var(--a3);border:1px solid rgba(104,211,145,.3);padding:3px 10px;border-radius:20px}
+.prog-wrap{width:100px;height:3px;background:var(--s3);border-radius:2px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--a1),var(--a5));border-radius:2px;transition:width .5s;width:0%}
+
+/* HERO */
+.hero{position:relative;z-index:1;padding:4rem 2rem 2rem;text-align:center;max-width:860px;margin:0 auto}
+.hero-eye{font-size:.62rem;letter-spacing:3px;text-transform:uppercase;color:var(--a1);margin-bottom:.8rem;opacity:.8}
+.hero-title{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(2rem,5vw,3.2rem);line-height:1.05;letter-spacing:-2px;background:linear-gradient(135deg,#fff 30%,var(--a1) 70%,var(--a5) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:.8rem}
+.hero-sub{font-size:.82rem;color:var(--tx2);line-height:1.7;max-width:500px;margin:0 auto 2rem;font-family:'Lora',serif;font-style:italic}
+
+/* COURSE GRID */
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.9rem;padding:0 1.5rem 1.5rem;position:relative;z-index:1;max-width:1200px;margin:0 auto}
+.ccard{background:var(--s1);border:1px solid var(--b1);border-radius:14px;padding:1.2rem;cursor:pointer;transition:all .3s cubic-bezier(.34,1.56,.64,1);position:relative;overflow:hidden}
+.ccard::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 40%,rgba(255,255,255,.015));pointer-events:none}
+.ccard:hover{transform:translateY(-4px) scale(1.02);border-color:var(--cc,var(--a1));box-shadow:0 12px 40px rgba(0,0,0,.4),0 0 0 1px var(--cc,var(--a1))}
+.ccard.active{border-color:var(--cc,var(--a1));background:var(--s2);box-shadow:0 0 0 1px var(--cc,var(--a1))}
+.ccard-icon{font-size:1.7rem;margin-bottom:.7rem;display:block}
+.ccard-num{font-size:.58rem;letter-spacing:2px;color:var(--cc,var(--a1));text-transform:uppercase;margin-bottom:.25rem;opacity:.8}
+.ccard-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.82rem;line-height:1.3;color:var(--tx)}
+.ccard-prog{height:2px;background:var(--s3);border-radius:1px;margin-top:.9rem;overflow:hidden}
+.ccard-prog-f{height:100%;background:var(--cc,var(--a1));border-radius:1px;width:0%;transition:width .5s}
+
+/* MAIN */
+.main{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:0 1.5rem 4rem}
+
+/* EMPTY */
+.empty{text-align:center;padding:5rem 2rem;color:var(--tx2);position:relative;z-index:1}
+.empty-icon{font-size:3rem;margin-bottom:1rem}
+.empty-title{font-family:'Syne',sans-serif;font-size:1.1rem;margin-bottom:.4rem;color:var(--tx)}
+.empty-sub{font-size:.78rem}
+
+/* COURSE HEADER */
+.ch{display:flex;align-items:flex-start;gap:1rem;margin-bottom:1.2rem}
+.ch-icon{font-size:2.2rem;flex-shrink:0;line-height:1}
+.ch h2{font-family:'Syne',sans-serif;font-weight:800;font-size:1.35rem;letter-spacing:-.5px}
+.ch .sub{font-size:.73rem;color:var(--tx2);margin-top:3px;font-style:italic;font-family:'Lora',serif}
+
+/* TABS */
+.tabs{display:flex;gap:4px;background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:4px;margin-bottom:1.2rem;overflow-x:auto}
+.tbtn{flex:1;min-width:90px;padding:7px 14px;border:none;border-radius:7px;background:transparent;color:var(--tx2);font-family:'DM Mono',monospace;font-size:.7rem;cursor:pointer;transition:all .2s;white-space:nowrap}
+.tbtn:hover{color:var(--tx);background:var(--s2)}
+.tbtn.active{background:var(--s3);color:var(--a1)}
+
+/* PANELS */
+.panel{display:none}
+.panel.active{display:block;animation:fsi .35s ease}
+@keyframes fsi{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* CONTENT GRID */
+.cgr{display:grid;grid-template-columns:1fr 1fr;gap:.9rem;margin-bottom:1rem}
+@media(max-width:680px){.cgr{grid-template-columns:1fr}}
+.cb{background:var(--s1);border:1px solid var(--b1);border-radius:12px;padding:1.1rem}
+.cb.fw{grid-column:1/-1}
+.bt{font-family:'Syne',sans-serif;font-weight:700;font-size:.75rem;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:.7rem;display:flex;align-items:center;gap:7px}
+.bt::before{content:'';width:3px;height:12px;background:var(--a1);border-radius:2px;flex-shrink:0}
+
+/* LIST */
+.il{list-style:none;display:flex;flex-direction:column;gap:5px}
+.il li{font-size:.76rem;color:var(--tx2);line-height:1.5;padding:6px 10px;background:var(--s2);border-radius:6px;border-left:2px solid var(--a1);transition:border-color .2s}
+.il li:hover{border-left-color:var(--a2);color:var(--tx)}
+
+/* TABLE */
+.stbl{width:100%;border-collapse:collapse;font-size:.73rem}
+.stbl th,.stbl td{padding:7px 11px;text-align:left;border-bottom:1px solid var(--b1)}
+.stbl th{color:var(--a1);font-weight:600;font-size:.65rem;text-transform:uppercase;letter-spacing:1px}
+.stbl td{color:var(--tx2)}
+.stbl tr:hover td{color:var(--tx);background:rgba(255,255,255,.015)}
+
+/* SCHEMA */
+.schema{background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:1.1rem;font-size:.76rem;line-height:2;color:var(--tx2)}
+.schema .ar{color:var(--a1)}
+.schema .kw{color:var(--a3);font-weight:500}
+.schema .dk{color:var(--a4)}
+.schema .wk{color:var(--a2)}
+
+/* TAGS */
+.tag{display:inline-block;font-size:.62rem;padding:2px 8px;border-radius:20px;margin:2px;font-weight:500;letter-spacing:.5px}
+.tb{background:rgba(99,179,237,.12);color:var(--a1);border:1px solid rgba(99,179,237,.25)}
+.to{background:rgba(246,173,85,.12);color:var(--a2);border:1px solid rgba(246,173,85,.25)}
+.tg{background:rgba(104,211,145,.12);color:var(--a3);border:1px solid rgba(104,211,145,.25)}
+.tr{background:rgba(252,129,129,.12);color:var(--a4);border:1px solid rgba(252,129,129,.25)}
+.tp{background:rgba(183,148,244,.12);color:var(--a5);border:1px solid rgba(183,148,244,.25)}
+
+/* HIGHLIGHT */
+.hl{background:rgba(99,179,237,.05);border:1px solid rgba(99,179,237,.18);border-radius:8px;padding:9px 13px;font-size:.76rem;line-height:1.6;color:var(--tx2);margin:5px 0}
+.hl.warn{background:rgba(246,173,85,.05);border-color:rgba(246,173,85,.18)}
+.hl.danger{background:rgba(252,129,129,.05);border-color:rgba(252,129,129,.18)}
+.hl.ok{background:rgba(104,211,145,.05);border-color:rgba(104,211,145,.18)}
+
+/* FORMULA */
+.fcard{background:linear-gradient(135deg,var(--s2),var(--s3));border:1px solid rgba(246,173,85,.2);border-radius:10px;padding:1rem;margin:5px 0}
+.ftit{font-size:.62rem;letter-spacing:2px;text-transform:uppercase;color:var(--a2);margin-bottom:.4rem}
+.fbody{font-family:'Lora',serif;font-size:.95rem;color:var(--tx);text-align:center;padding:.4rem;background:rgba(0,0,0,.2);border-radius:7px}
+
+/* GCS */
+.gcs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem}
+@media(max-width:600px){.gcs-grid{grid-template-columns:1fr}}
+.gcs-sec{background:var(--s1);border:1px solid var(--b1);border-radius:9px;padding:.9rem}
+.gcs-stit{font-size:.65rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--a1);margin-bottom:.6rem}
+.gcs-row{display:flex;align-items:center;justify-content:space-between;padding:5px 7px;border-radius:5px;cursor:pointer;transition:background .2s;font-size:.72rem;color:var(--tx2)}
+.gcs-row:hover{background:var(--s2);color:var(--tx)}
+.gcs-row.sel{background:rgba(99,179,237,.1);color:var(--a1)}
+.gcs-badge{font-size:.62rem;background:var(--s3);padding:2px 7px;border-radius:9px}
+.gcs-total{margin-top:.9rem;text-align:center;padding:.9rem;background:var(--s1);border:1px solid var(--b1);border-radius:9px}
+.gcs-num{font-family:'Syne',sans-serif;font-size:2.2rem;font-weight:800}
+.gcs-lbl{font-size:.68rem;color:var(--tx2);margin-top:3px}
+.c-sev{color:var(--a4)}.c-mod{color:var(--a2)}.c-ok{color:var(--a3)}
+
+/* FLASHCARDS */
+.fc-wrap{perspective:1200px;margin:0 auto}
+.fc{position:relative;width:100%;height:260px;cursor:pointer;transform-style:preserve-3d;transition:transform .65s cubic-bezier(.4,0,.2,1)}
+.fc.flipped{transform:rotateY(180deg)}
+.fc-face{position:absolute;inset:0;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1.8rem;text-align:center;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.fc-front{background:linear-gradient(135deg,var(--s2),var(--s3));border:1px solid var(--b2)}
+.fc-back{background:linear-gradient(135deg,var(--s3),rgba(99,179,237,.08));border:1px solid rgba(99,179,237,.28);transform:rotateY(180deg)}
+.fc-lbl{font-size:.6rem;letter-spacing:3px;text-transform:uppercase;color:var(--a1);margin-bottom:.9rem;opacity:.8}
+.fc-q{font-family:'Lora',serif;font-size:1rem;line-height:1.5;color:var(--tx);font-style:italic}
+.fc-a{font-size:.82rem;line-height:1.7;color:var(--tx2)}
+.fc-a strong{color:var(--a3)}
+.fc-hint{margin-top:.9rem;font-size:.62rem;color:var(--mt);letter-spacing:1px}
+.fc-nav{display:flex;align-items:center;justify-content:space-between;margin-top:.9rem;gap:.8rem}
+.fc-ctr{font-size:.68rem;color:var(--mt);min-width:55px;text-align:center}
+.fc-btns{display:flex;gap:7px;margin-top:.9rem;justify-content:center}
+
+/* BUTTONS */
+.btn{padding:7px 18px;border-radius:7px;border:none;cursor:pointer;font-family:'DM Mono',monospace;font-size:.72rem;transition:all .2s;display:inline-flex;align-items:center;gap:5px}
+.btn-p{background:var(--a1);color:var(--bg);font-weight:600}
+.btn-p:hover{background:#90cdf4;transform:translateY(-1px)}
+.btn-sec{background:var(--s2);color:var(--tx2);border:1px solid var(--b1)}
+.btn-sec:hover{color:var(--tx);background:var(--s3)}
+.btn-ok{background:rgba(104,211,145,.12);color:var(--a3);border:1px solid rgba(104,211,145,.28)}
+.btn-ok:hover{background:rgba(104,211,145,.22)}
+.btn-ko{background:rgba(252,129,129,.12);color:var(--a4);border:1px solid rgba(252,129,129,.28)}
+.btn-ko:hover{background:rgba(252,129,129,.22)}
+
+/* QCM */
+.qcm-hd{display:flex;align-items:center;gap:11px;padding:11px 15px;background:var(--s1);border-radius:9px;border:1px solid var(--b1);margin-bottom:1rem;font-size:.73rem;color:var(--tx2)}
+.qcm-score-n{font-family:'Syne',sans-serif;font-size:1.2rem;color:var(--a3);font-weight:700}
+.qcm-list{display:flex;flex-direction:column;gap:.9rem}
+.qblock{background:var(--s1);border:1px solid var(--b1);border-radius:11px;padding:1.1rem}
+.q-txt{font-family:'Lora',serif;font-size:.88rem;color:var(--tx);margin-bottom:.9rem;line-height:1.6;font-style:italic}
+.q-opts{display:flex;flex-direction:column;gap:5px}
+.q-opt{padding:9px 13px;border-radius:7px;border:1px solid var(--b1);background:var(--s2);cursor:pointer;font-size:.76rem;color:var(--tx2);transition:all .2s;display:flex;align-items:center;gap:9px;text-align:left}
+.q-opt:hover:not(.answered){border-color:var(--a1);color:var(--tx);background:rgba(99,179,237,.05)}
+.q-opt.correct{border-color:var(--a3);background:rgba(104,211,145,.08);color:var(--a3)}
+.q-opt.wrong{border-color:var(--a4);background:rgba(252,129,129,.08);color:var(--a4)}
+.q-opt.rev-ok{border-color:rgba(104,211,145,.35);background:rgba(104,211,145,.04);color:var(--a3);opacity:.7}
+.opt-lt{width:20px;height:20px;border-radius:50%;background:var(--s3);display:flex;align-items:center;justify-content:center;font-size:.62rem;font-weight:700;flex-shrink:0;color:var(--tx2)}
+.q-fb{margin-top:.7rem;padding:9px 13px;border-radius:7px;font-size:.73rem;line-height:1.5;display:none}
+.q-fb.show{display:block;animation:fsi .3s ease}
+.q-fb.ok{background:rgba(104,211,145,.06);border:1px solid rgba(104,211,145,.18);color:var(--a3)}
+.q-fb.ko{background:rgba(252,129,129,.06);border:1px solid rgba(252,129,129,.18);color:var(--a4)}
+
+/* TIMELINE */
+.tl{position:relative;padding-left:1.8rem}
+.tl::before{content:'';position:absolute;left:7px;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,var(--a1),var(--a5),transparent)}
+.tl-item{position:relative;margin-bottom:1rem}
+.tl-dot{position:absolute;left:-1.8rem;top:4px;width:11px;height:11px;border-radius:50%;background:var(--a1);border:2px solid var(--bg);box-shadow:0 0 0 2px var(--a1)}
+.tl-c{background:var(--s1);border:1px solid var(--b1);border-radius:9px;padding:9px 13px;font-size:.76rem;color:var(--tx2);line-height:1.6}
+.tl-c strong{color:var(--tx);display:block;margin-bottom:2px}
+
+/* NOTIF */
+.notif{position:fixed;top:68px;right:1.2rem;background:var(--s2);border:1px solid var(--b1);border-radius:9px;padding:9px 15px;font-size:.73rem;color:var(--tx);z-index:300;transform:translateX(120%);transition:transform .3s;box-shadow:0 8px 25px rgba(0,0,0,.3)}
+.notif.show{transform:translateX(0)}
+.notif.ok{border-color:rgba(104,211,145,.4)}
+.notif.ko{border-color:rgba(252,129,129,.4)}
+
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--mt);border-radius:2px}
+@media(max-width:600px){.cgrid{grid-template-columns:1fr 1fr;padding:0 1rem 1rem}.main{padding:0 1rem 3rem}header{padding:0 1rem}.hero{padding:2.5rem 1rem 1.5rem}}
+</style>
+</head>
+<body>
+
+<div class="notif" id="notif"></div>
+
+<header>
+  <div class="logo"><div class="pulse"></div>RÉANIMATION</div>
+  <div class="hdr-r">
+    <span class="sc-badge" id="gScore">Score: 0 / 0</span>
+    <div class="prog-wrap"><div class="prog-fill" id="gProg"></div></div>
+  </div>
+</header>
+
+<div class="hero">
+  <p class="hero-eye">Plateforme de Révision Médicale</p>
+  <h1 class="hero-title">Réanimation<br>Médicale</h1>
+  <p class="hero-sub">Cours complets tirés de vos notes, QCM, flashcards et outils interactifs. Sélectionnez un module pour commencer.</p>
+</div>
+
+<div class="cgrid" id="cgrid"></div>
+
+<div class="empty" id="empty">
+  <div class="empty-icon">🩺</div>
+  <div class="empty-title">Choisissez un cours ci-dessus</div>
+  <div class="empty-sub">11 modules · QCM · Flashcards · Calculateur GCS</div>
+</div>
+
+<div class="main" id="main" style="display:none">
+  <div class="ch">
+    <div class="ch-icon" id="chIcon"></div>
+    <div><h2 id="chTitle"></h2><p class="sub" id="chSub"></p></div>
+  </div>
+  <div class="tabs" id="tabs"></div>
+  <div id="panels"></div>
+</div>
+
+<script>
+// ═══════════════════════════ DATA ═══════════════════════════
+const C=[
+{id:'choc',icon:'💔',color:'#fc8181',title:'États de Choc',sub:'Hémorragique · Cardiogénique · Septique · Anaphylactique',
+cours:[
+{t:'Définition & Généralités',fw:true,items:['Souffrance d\'organe secondaire à une ↓ aiguë et durable des apports en O₂','Perturbation hémodynamique ET métabolique','Choc Hypotensif défini par PAS < 90 mmHg','Signes hypoperfusion : Cyanose, Tachycardie, Pâleur, Angoisse','Défaillance d\'organes : cardiaque, pulmonaire, rénale, hépatique']},
+{t:'① Choc Hémorragique',items:['PAS < 90 ou PAM < 60 mmHg','Signes gravité : Bradycardie, HypoTA prolongée, Acidose lactique','Étiologies : Trauma, abdomen, GEU, anticoagulants','Arrêt saignement : compression, garrot, chirurgie','Objectif hémodynamique : PAM = 60, PAS = 90','Objectif réa : Hb > 8 g/dL, Plq > 50.000, TP > 50%, Fibrinogène > 1g/L']},
+{t:'② Choc Cardiogénique',items:['↓ Débit cardiaque avec hypoxie tissulaire en ABSENCE d\'hypovolémie','Étiologies : IDM, trouble de rythme, EP massive','Signes : Cyanose, Extrémités froides, HypoTA, Signes neurologiques','1re intention : Dobutamine → 2e : Adrénaline','PEC respiratoire + ECG cardiaque avec OAP']},
+{t:'③ Choc Anaphylactique',items:['Manifestation la plus grave d\'hypersensibilité immédiate','Étiologies : ATB, produits de remplissage, AINS, Antalgiques','Signes cutanéo-muqueux selon stades','Traitement : Arrêt produit, O₂, Contrôle VA + Adrénaline']},
+{t:'④ Choc Septique',fw:true,items:['Sepsis = dysfonction d\'organe par réponse inappropriée à une infection','Choc septique = Sepsis + HypoTA persistante malgré remplissage','Quick SOFA : GCS < 15, PAS < 100, FR > 22 c/min (2/3 critères)','PEC : Remplissage vasculaire (cristalloïdes) + Noradrénaline','Agents vasopresseurs + ATB + Inotropes positifs']}
+],
+fc:[
+{q:'Définition du choc hémorragique ?',a:'PAS < 90 mmHg ou PAM < 60 mmHg avec signe d\'hypoperfusion tissulaire dus à un saignement actif.'},
+{q:'Les 4 types de choc ?',a:'① Hémorragique ② Cardiogénique ③ Septique ④ Anaphylactique'},
+{q:'Objectifs hémodynamiques du choc hémorragique ?',a:'PAM = 60 mmHg, PAS = 90 mmHg. Hb > 8 g/dL, Plq > 50.000, TP > 50%, Fibrinogène > 1g/L'},
+{q:'Drogue de 1re intention dans le choc cardiogénique ?',a:'Dobutamine en 1re intention, puis Adrénaline en 2e intention.'},
+{q:'Définition du choc septique ?',a:'Sepsis + hypotension persistante malgré remplissage vasculaire adéquat.'},
+{q:'3 critères Quick SOFA ?',a:'GCS < 15 + PAS < 100 mmHg + FR > 22 c/min. 2/3 = suspicion de sepsis.'},
+{q:'Traitement du choc anaphylactique ?',a:'Arrêt du produit, O₂, contrôle des voies aériennes. Adrénaline IM.'},
+{q:'Noradrénaline est le vasopresseur de référence dans quel choc ?',a:'Choc septique. Dobutamine = cardiogénique. Adrénaline = anaphylactique réfractaire.'}
+],
+qcm:[
+{q:'Le choc cardiogénique se définit par :',opts:['HypoTA + hypovolémie','↓ DC avec hypoxie tissulaire en absence d\'hypovolémie','PAS < 90 + infection','FR > 22 + GCS < 15'],c:1,ex:'Le choc cardiogénique = ↓ DC avec hypoxie tissulaire en ABSENCE d\'hypovolémie. Dobutamine en 1re intention.'},
+{q:'La drogue vasopressive de référence dans le choc septique est :',opts:['Adrénaline','Dobutamine','Noradrénaline','Dopamine'],c:2,ex:'Noradrénaline = vasopresseur de référence du choc septique (guidelines SSCG).'},
+{q:'L\'objectif de Plaquettes dans le choc hémorragique est :',opts:['> 20.000','>  50.000','> 100.000','> 150.000'],c:1,ex:'Plq > 50.000/mm³. Rappel complet : Hb > 8, TP > 50%, Fibrinogène > 1g/L.'},
+{q:'Quick SOFA comprend :',opts:['GCS, SpO₂, Diurèse','GCS < 15, PAS < 100, FR > 22','PAM < 65, Lactate > 2, Noradrénaline','Température, Leucocytes, FC'],c:1,ex:'Quick SOFA : GCS < 15 + PAS < 100 mmHg + FR > 22 c/min. 2/3 = évoquer le sepsis.'},
+{q:'Dans le choc hémorragique, l\'objectif de PAM est :',opts:['PAM > 90 mmHg','PAM > 80 mmHg','PAM = 60 mmHg','PAM = 40 mmHg'],c:2,ex:'PAM objectif = 60 mmHg dans le choc hémorragique. On évite l\'hyperpression pour ne pas aggraver le saignement.'}
+]},
+
+{id:'tc',icon:'🧠',color:'#b794f4',title:'Traumatisme Crânien Grave',sub:'GCS · PIC · ACSOS · Sédation · PPC',
+cours:[
+{t:'TCG défini par GCS ≤ 8',fw:true,items:['Trouble de déglutition, chute de langue, risque d\'inhalation','Atteinte thoraco-pulmonaire associée possible','Trouble de la commande ventilatoire','→ INTUBATION sans mobilisation du rachis cervical + VENTILATION']},
+{t:'Score de Glasgow — Ouverture des yeux (E)',items:['4 = Spontanée','3 = Au bruit','2 = À la douleur','1 = Absente']},
+{t:'Score de Glasgow — Réponse Verbale (V)',items:['5 = Orientée','4 = Confuse','3 = Inappropriée','2 = Incompréhensible','1 = Absente']},
+{t:'Score de Glasgow — Réponse Motrice (M)',items:['6 = Obéit','5 = Adaptée','4 = Orientée','3 = Flexion réflexe','2 = Extension réflexe','1 = Absente']},
+{t:'Objectifs Thérapeutiques',items:['PIC < 20 mmHg (éviter engagement cérébral)','PPC = PAH - PIC → objectif PPC = 60 mmHg','PAS > 120, PAM = 80-100 mmHg','SpO₂ > 92%, PaO₂ > 70 mmHg, PCO₂ = 37-40 mmHg','Hb = 10 g/100 mL, Natriémie 140-150, Glycémie 4-7 mmol/L']},
+{t:'ACSOS — Agressions Cérébrales Secondaires d\'Origine Systémique',fw:true,items:['Lésions primaires : Hématome, Contusions','Lésions IIaires centrales : Épilepsie, Hématome','Lésions IIaires systémiques : Hypotension, Hypoxémie','Principe de base : LUTTER CONTRE LES ACSOS +++']},
+{t:'Sédation & Réduction CMRO₂',items:['1. Prévenir les convulsions','2. Sédation morphinique','3. Burst Suppression','4. Prévenir hyperthermie (36-33°C)','5. Hypothermie thérapeutique','FDR convulsions post-traumatiques : GCS < 10, HED, Contusion, Plaie pénétrante']},
+{t:'Correction Métabolique',items:['Natriémie 140-150 mmol/L','Osmolalité 290-320','Glycémie 4-7 mmol/L','Équilibre acido-basique']}
+],
+fc:[
+{q:'TCG défini par quel GCS ?',a:'GCS ≤ 8/15. TCG = Traumatisme Crânien Grave.'},
+{q:'Formule de la PPC ?',a:'PPC = PAH - PIC. Objectif PPC = 60 mmHg.'},
+{q:'Objectif de PIC dans le TCG ?',a:'PIC < 20 mmHg pour éviter l\'engagement cérébral et l\'ischémie microvasculaire.'},
+{q:'Signification de l\'acronyme ACSOS ?',a:'Agressions Cérébrales Secondaires d\'Origine Systémique.'},
+{q:'FDR de convulsions post-traumatiques ?',a:'GCS < 10, HED (Hématome Extra-Dural), Contusion, Plaie pénétrante.'},
+{q:'Paramètres ventilatoires dans le TCG ?',a:'SpO₂ > 92%, PaO₂ > 70 mmHg, PCO₂ = 37-40 mmHg. Hb = 10 g/100 mL.'},
+{q:'Méthodes pour réduire la CMRO₂ ?',a:'① Prévenir convulsions ② Sédation morphinique ③ Burst suppression ④ Éviter hyperthermie ⑤ Hypothermie thérapeutique.'},
+{q:'Décortication vs Décérébration au GCS ?',a:'Décortication = Flexion Mb Sup + Extension Mb Inf (GCS moteur 3). Décérébration = Extension + Abduction + Pronation Mb Sup + Extension Mb Inf (GCS moteur 2).'}
+],
+qcm:[
+{q:'Patient : Ouverture des yeux à la douleur (2) + Verbale incompréhensible (2) + Flexion réflexe (3). GCS ?',opts:['GCS = 5','GCS = 7','GCS = 8','GCS = 9'],c:1,ex:'2 + 2 + 3 = GCS = 7. TCG car GCS ≤ 8.'},
+{q:'La PPC correspond à :',opts:['PAS - PAD','PAM - PIC','PAH + PIC','PAS / PIC'],c:1,ex:'PPC = PAH (= PAM) - PIC. Objectif = 60 mmHg.'},
+{q:'Objectif de PIC dans le TCG :',opts:['PIC < 5 mmHg','PIC < 10 mmHg','PIC < 20 mmHg','PIC < 40 mmHg'],c:2,ex:'PIC < 20 mmHg est l\'objectif dans le TCG pour éviter l\'engagement cérébral.'},
+{q:'Parmi ces FDR de convulsions post-traumatiques, lequel est FAUX ?',opts:['GCS < 10','Plaie pénétrante','Alcoolisme chronique','HED'],c:2,ex:'Les FDR officiels : GCS < 10, HED, Contusion, Plaie pénétrante. L\'alcoolisme n\'est pas dans la liste.'}
+]},
+
+{id:'cpo',icon:'🏥',color:'#68d391',title:'Complications Post-Opératoires',sub:'Respiratoires · Hémodynamiques · Hémorragiques · ISO',
+cours:[
+{t:'9 Types de CPO',fw:true,items:['① Respiratoires post-opératoires (CRPO)','② Hémodynamiques','③ Hémorragiques','④ Neurologiques','⑤ Thromboemboliques','⑥ Posturales','⑦ Infectieuses (ISO)','⑧ Métaboliques','⑨ Nausées et Vomissements Post-opératoires (NVPO)']},
+{t:'① CRPO — FDR & Physiopath',items:['Peut s\'agir : Atélectasie, Pneumopathies, Épanchement pleural, Encombrement bronchique','FDR patient : âge, classe ASA, tabac, obésité, Corticoïdes, Alcool','FDR procédure : chirurgie thoracique, aortique, abdominale sus-mésocolique','PEC : ATB, VNI, Kinésithérapie respiratoire, drainage épanchement']},
+{t:'② Complications Hémodynamiques',items:['HypoTA : ↓ TA de 20% → Remplissage + Vasopresseurs + tt étiologique','HTA : ↑ TA de 20% → chercher : Douleur, Hypercapnie, Hypoxie, Frissons, Nausées','ACFA post-op : Cordarone ou choc électrique. Brady : Atropine','OAP : Excès remplissage, Sepsis, Ischémie myocardique → Diurétique IV + VNI','Ischémie myocardique silencieuse → ECG → Doser troponine']},
+{t:'③ Complications Hémorragiques',items:['Clinique : Tachycardie, HypoTA, Pâleur, Saignement au site','Traitement : Reprise chirurgicale, Remplissage, Noradrénaline, Transfusion, Fibrinogène']},
+{t:'⑤ Thromboemboliques — Triade de Virchow',fw:true,items:['Stase veineuse + Hypercoagulabilité + Altération endothéliale','Prévention mécanique : déambulation précoce + bas de contention','Prévention médicamenteuse : HBPM','TVP : écho doppler → AVK. EP : AngioScanner → AVK']},
+{t:'⑦ ISO — Classes Chirurgicales',items:['Classe 1 : Chirurgie propre','Classe 2 : Propre contaminée','Classe 3 : Contaminée < 4 heures','Classe 4 : Sale > 4 heures','Diagnostic : hyperthermie, écoulement pus → NFS, CRP, Hémocultures','Tt : ATB adaptée (médical) ou chirurgie (foyer septique)']},
+{t:'⑨ NVPO & Complication Métabolique',items:['NVPO : dexaméthasone en prévention. AR-5HT3 en curatif','Décompensation diabète : Acidocétose, Hyperosmolaire','Troubles ioniques : dysnatrémie, dyskaliémie','IRC post-op : épreuve de remplissage en 1er']}
+],
+fc:[
+{q:'Triade de Virchow ?',a:'① Stase veineuse ② Hypercoagulabilité ③ Altération endothéliale → FDR de TVP/EP.'},
+{q:'Que chercher systématiquement devant une HTA post-op ?',a:'Douleur — Hypercapnie — Hypoxie — Frissons — Nausées et Vomissements.'},
+{q:'FDR liés au patient pour CRPO ?',a:'Âge, Classe ASA, Tabac, Obésité, Corticoïdes, Alcool.'},
+{q:'Traitement de référence TVP et EP ?',a:'Les AVK sont le traitement de référence. HBPM en prévention.'},
+{q:'Classes chirurgicales de risque infectieux ?',a:'1=propre | 2=propre contaminée | 3=contaminée < 4h | 4=sale > 4h.'},
+{q:'Traitement ACFA post-opératoire ?',a:'Cordarone (amiodarone) IV ou choc électrique externe si instabilité hémodynamique.'},
+{q:'Prévention NVPO ?',a:'Dexaméthasone (Soluou avec ondansétron). Curatif : AR-5HT3.'},
+{q:'1er geste devant une IRC post-opératoire ?',a:'Une épreuve de remplissage vasculaire est la 1ère chose à faire.'}
+],
+qcm:[
+{q:'La Triade de Virchow comprend :',opts:['Hypoxie + HypoTA + Bradycardie','Stase veineuse + Hypercoagulabilité + Altération endothéliale','Douleur + Fièvre + Leucocytose','Tachycardie + Désaturation + HypoTA'],c:1,ex:'Triade de Virchow = Stase veineuse + Hypercoagulabilité + Altération endothéliale. Physiopathologie des TVP/EP.'},
+{q:'Devant une ACFA post-opératoire instable, quel traitement ?',opts:['Atropine','Cordarone ou choc électrique externe','Dobutamine','Noradrénaline'],c:1,ex:'ACFA instable : Choc électrique externe (CEE). Stable : Cordarone IV.'},
+{q:'La classe 3 de chirurgie correspond à :',opts:['Chirurgie propre','Propre contaminée','Contaminée < 4 heures','Sale > 4 heures'],c:2,ex:'Classe 3 = Chirurgie contaminée < 4h. Classe 4 = Sale > 4h = risque infectieux maximal.'},
+{q:'1re chose à faire devant une insuffisance rénale post-opératoire :',opts:['Hémodialyse immédiate','Diurétiques IV','Épreuve de remplissage vasculaire','Arrêt de tous les médicaments'],c:2,ex:'L\'épreuve de remplissage est la 1ère étape : elle élimine l\'hypovolémie comme cause d\'anurie pré-rénale.'}
+]},
+
+{id:'transfu',icon:'🩸',color:'#fc8181',title:'Transfusion Sanguine',sub:'ABO · RAI · PSL · Accidents transfusionnels',
+cours:[
+{t:'Bases Immunologiques',items:['Antigène (Ag) : Substance provoquant une réaction immunitaire','Anticorps (Ac) : Protéine produite par l\'administration d\'Ag','Groupe ABO = présence ou absence d\'Ag à la surface des hématies et Ac dans le plasma']},
+{t:'Règles de Compatibilité — SANG',fw:true,schema:`<strong class="kw">Sang :</strong> O = donneur universel<br>O <span class="ar">→</span> A, B, AB, O (donne à tous)<br><br>
+<strong class="kw">Plasma :</strong> AB = receveur universel de plasma<br>AB <span class="ar">←</span> O, A, B, AB (reçoit de tous)<br><br>
+<strong class="wk">Exemple Groupe A :</strong><br>
+Ag A sur ses hématies <span class="ar">+</span> Ac Anti-B dans son plasma`},
+{t:'RAI — Indications',items:['Avant toute transfusion de PSL (Produits Sanguins Labiles)','Pour bilan post-transfusionnel','Lors de suivi de grossesse']},
+{t:'7 Étapes de l\'Acte Transfusionnel',fw:true,items:['1/ Demande d\'examen biologique (RAI, groupage)','2/ Demande de PSL','3/ Réception des PSL','4/ Modalités de conservation','5/ Réalisation de l\'acte transfusionnel','6/ Traçabilité','7/ CAT devant accident transfusionnel']},
+{t:'Accidents Transfusionnels',items:['1/ Accident hémolytique par incompatibilité érythrocytaire','2/ Réaction frissons-hyperthermique','3/ Manifestations allergiques','4/ TRALI = DR post-transfusionnelle','5/ Accident infectieux','6/ Accident de surcharge : volémique / en citrate / en fer']},
+{t:'CAT + Médicaments',items:['CAT : STOP transfusion → alerter médecin → surveillance → vérifier ABO → tt étiologique','Anti-histaminiques : réaction peu sévère','Antipyrétiques (paracétamol) : réaction fébrile','Corticoïdes : réactions allergiques, prurit','Diurétiques : surcharge volémique','Adrénaline : choc anaphylactique']}
+],
+fc:[
+{q:'Donneur universel de sang ?',a:'Le groupe O négatif est le donneur universel de sang (pas d\'Ag A ni B ni Rh sur ses hématies).'},
+{q:'Receveur universel de plasma ?',a:'Le groupe AB est le receveur universel de plasma (il n\'a pas d\'anticorps anti-A ni anti-B).'},
+{q:'3 indications du RAI ?',a:'① Avant toute transfusion de PSL ② Bilan post-transfusionnel ③ Suivi de grossesse.'},
+{q:'Qu\'est-ce que le TRALI ?',a:'Transfusion Related Acute Lung Injury = détresse respiratoire aiguë post-transfusionnelle par lésion pulmonaire (dans les 6h).'},
+{q:'CAT immédiate devant un accident transfusionnel ?',a:'STOP transfusion → Alerter médecin → Surveillance → Vérifier ABO → Traitement étiologique.'},
+{q:'7 étapes de l\'acte transfusionnel ?',a:'① Examen bio ② Demande PSL ③ Réception ④ Conservation ⑤ Réalisation ⑥ Traçabilité ⑦ CAT accident.'},
+{q:'Un patient groupe B peut recevoir du sang de quel groupe ?',a:'Sang de groupe B (isogroupe) OU groupe O (donneur universel).'}
+],
+qcm:[
+{q:'Un patient groupe B peut recevoir du sang de :',opts:['Uniquement B','B et O','A, B, O, AB','AB uniquement'],c:1,ex:'Groupe B : Ag B sur hématies + Ac anti-A dans plasma → compatible avec O (pas d\'Ag A ni B) et B (iso).'},
+{q:'Le TRALI correspond à :',opts:['Réaction frissons-hyperthermie','Surcharge volémique','Détresse respiratoire aiguë post-transfusionnelle','Hémolyse intra-vasculaire'],c:2,ex:'TRALI = Détresse respiratoire aiguë non-cardiogénique dans les 6h post-transfusion. Lésion pulmonaire par Ac du donneur.'},
+{q:'Le RAI est indiqué :',opts:['Uniquement après accident','Avant transfusion PSL + post-transfusionnel + suivi grossesse','Seulement chez femme enceinte','Uniquement avant chirurgie élective'],c:1,ex:'RAI = 3 indications : avant transfusion PSL, bilan post-transfusionnel, suivi de grossesse.'}
+]},
+
+{id:'ira',icon:'🫁',color:'#63b3ed',title:'Insuffisance Respiratoire Aiguë',sub:'IRA · Ventilation mécanique · VNI · Oxygénothérapie',
+cours:[
+{t:'Définition de l\'IRA',fw:true,items:['Impossibilité pour un malade de maintenir une homéostase normale des GDS artériels','GDS artériel → Hypoxémie : PaO₂ < 80 mmHg, SaO₂ < 95%','Associé ou non à une Hypercapnie','IRA = hypoxémie d\'installation rapide sans préjuger de gravité ni de cause','Détresse Respiratoire : IRA qui met en jeu le pronostic vital']},
+{t:'Physiopathologie — Mécanismes Hypoxémie',items:['Fonction pompe (Ventilation) : Atteinte primitive ou secondaire','Fonction échange gazeux (Hématose) : Altération rapport VA/Q, Diffusion','Fonction transport O₂','Atmosphère déficiente en O₂']},
+{t:'Diagnostic Positif — GDS',items:['IRA si : PaO₂ < 80 mmHg ET SaO₂ < 95% ± PaCO₂ > 45 mmHg','Gravité si : PaO₂ < 50, PH < 7.20, PaCO₂ > 60','Signes cliniques gravité : FR > 30 ou < 10 c/min, cyanose intense, état de choc']},
+{t:'Signes Cliniques',items:['Polypnée : FR > 30 c/min | Bradypnée < 15 | Tachypnée > 30','Muscles cervicaux + Dépression sus-sternale et sus-claviculaire','Cyanose : SpO₂ ↓ + Tachycardie + Trouble de conscience','Encéphalopathie respiratoire : Mouvements anormaux, troubles psychiques']},
+{t:'Ventilation Mécanique — Indications',items:['DRA, État de choc, Coma, Arrêt circulatoire','CI VNI : Inexpérience opérateurs, Pneumothorax non drainé','VNI si : patient conscient + coopérant + sans risque vital immédiat + milieu réa','Indications VM invasive : Tachypnée > 30, Tirage +++, Apnée, Aggravation conscience']},
+{t:'Objectifs VNI + Méthodes O₂',fw:true,items:['SpO₂ > 92%, FR < 30, Absence cyanose, Vigilance conservée','Lunettes nasales : 1-2 L/min (faible débit)','Masque à Venturi : FiO₂ = 0,4-0,6 (contrôlée)','Masque à haute concentration : FiO₂ = 0,6-1','Respirateur → VM → contrôle fiable de FiO₂']},
+{t:'Étiologies selon Type IRA',items:['IRA hypoxémique (type 1) : OAP, Pneumonie, Atélectasie, EP','IRA hypercapnique (type 2) : Neuropathie, Myopathie, BPCO, Asthme','Démarche étiologique : Clinique → Biologie → Imagerie (RxThorax, ScThoracique)']}
+],
+fc:[
+{q:'Définition gazométrique de l\'IRA ?',a:'PaO₂ < 80 mmHg ET SaO₂ < 95%, associé ou non à une Hypercapnie (PaCO₂ > 45 mmHg).'},
+{q:'Critères de gravité gazométriques ?',a:'PaO₂ < 50 mmHg, PH < 7.20, PaCO₂ > 60 mmHg → pronostic grave.'},
+{q:'CI absolue à la VNI ?',a:'Pneumothorax non drainé. Aussi : inexpérience des opérateurs.'},
+{q:'Polypnée définie par quelle FR ?',a:'FR > 30 c/min (Tachypnée > 30, Bradypnée < 15 c/min).'},
+{q:'FiO₂ obtenue avec masque Venturi ?',a:'FiO₂ = 0,4 à 0,6 (40 à 60%). Contrôlée avec précision.'},
+{q:'IRA hypercapnique (type 2) — étiologies ?',a:'Atteinte de la pompe ventilatoire : Neuropathie, Myopathie. ↑ travail ventilatoire : BPCO, Asthme.'},
+{q:'Objectifs VNI ?',a:'SpO₂ > 92%, FR < 30 c/min, Absence de cyanose, Vigilance conservée.'}
+],
+qcm:[
+{q:'L\'IRA est définie gazométriquement par :',opts:['PaO₂ < 60 + PaCO₂ < 35','PaO₂ < 80 mmHg + SaO₂ < 95%','SpO₂ < 98%','PaCO₂ > 35 mmHg seulement'],c:1,ex:'IRA = PaO₂ < 80 mmHg ET SaO₂ < 95% ± PaCO₂ > 45 mmHg.'},
+{q:'La VNI est contre-indiquée dans :',opts:['BPCO décompensée','OAP cardiogénique','Pneumothorax non drainé','Asthme aigu grave'],c:2,ex:'Pneumothorax non drainé = CI absolue à la VNI (risque d\'aggraver le pneumo par pressurisation).'},
+{q:'Masque à haute concentration permet FiO₂ de :',opts:['0,21 à 0,35','0,35 à 0,50','0,60 à 1','Exactement 0,40'],c:2,ex:'Masque haute concentration FiO₂ = 0,6-1. Venturi = 0,4-0,6 contrôlée.'}
+]},
+
+{id:'brulures',icon:'🔥',color:'#f6ad55',title:'Brûlures',sub:'SCB · Wallace · Formule Baxter · PEC · SCA',
+cours:[
+{t:'Définition & Types',items:['Brûlure = destruction du revêtement cutané par agent thermique, chimique ou électrique','Électrisation = manifestations physiopathologiques par courant électrique','Électrocution = décès par électrisation','Types : Thermiques — Électriques — Chimiques — Radiques']},
+{t:'Brûlure Grave si —',fw:true,items:['🔴 Adulte : SCB > 20%','🔴 Enfant et sujet âgé : SCB > 10%','🔴 NRS (Nourrisson) : SCB > 5%','🔴 3e degré > 5% chez adulte ou enfant']},
+{t:'Profondeur des Brûlures',items:['1er degré : couche cornée superficielle (3-4 jours, sans séquelle)','2e degré superficiel : épiderme intact membrane basale (1-2 semaines, bonne cicatrisation)','2e degré profond : destruction partielle membrane basale (mauvaise cicatrisation)','3e degré : destruction totale épiderme + derme, insensible (pas de cicatrisation)']},
+{t:'Évaluation Gravité — 5 Facteurs',items:['1/ Étendue (SCB par règle de 9 de Wallace ou Lund-Browder en pédiatrie)','2/ Profondeur','3/ Localisation : Mains, Pieds, Face, Périnée, Cou, Visage','4/ Circonstance : AVP, explosion, incendie en milieu clos, haute tension','5/ Terrain : âges extrêmes, diabète, insuffisance cardiaque']},
+{t:'Formule de Baxter — Parkland (Adulte)',fw:true,schema:`<strong class="wk">Formule de Baxter du Parkland Hospital :</strong><br><br>
+H0 : <span class="kw">20 mL/kg</span> cristalloïdes (RL) en bolus<br>
+H0-H8 : <span class="kw">2 mL/kg/1% SCB</span> de cristalloïdes (RL)<br>
+H8-H16 : <span class="kw">2 mL/kg/1% SCB</span> de cristalloïdes (RL)<br>
+H16-H24 : <span class="kw">2 mL/kg/1% SCB</span> de cristalloïdes (RL)<br><br>
+<strong class="wk">Formule de Carvajal (Enfant) :</strong><br>
+2000 mL/m² SC + 5000 mL/m² de SCB<br>
+SC = (4 × Poids + 7) / (Poids + 90)`},
+{t:'PEC Intra-hospitalière 24h',items:['a/ Hémodynamique : RL + Albumine > H6 + Noradrénaline','b/ Ventilatoire : Ventilation protectrice (SDRA du brûlé)','c/ Nutrition entérale précoce < 12h — 25-30 Kcal/kg/jour','d/ HBPM précoce (thromboprophylaxie)','e/ SCA : Pression intra-abdo > 20 mmHg + défaillance organe → position, hémodiafiltration','f/ Couverture : hygiène, ambiance thermique, pommades','g/ Escarrotomie si 3e degré + Fasciotomies si brûlures circulaires']}
+],
+fc:[
+{q:'Brûlure grave si SCB > combien chez adulte ?',a:'SCB > 20% adulte. > 10% enfant/sujet âgé. > 5% NRS. 3e degré > 5%.'},
+{q:'Formule de remplissage vasculaire des brûlés adultes ?',a:'Formule de Baxter : 20 mL/kg en bolus H0, puis 2 mL/kg/1%SCB × 3 tranches de 8h. Soluté = Ringer Lactate.'},
+{q:'Surveillance principale de la réanimation des brûlés ?',a:'Diurèse et Pression Artérielle sont les deux paramètres principaux.'},
+{q:'Définition du Syndrome du Compartiment Abdominal (SCA) ?',a:'SCA = Pression intra-abdominale > 20 mmHg + au moins une nouvelle défaillance d\'organe.'},
+{q:'Formule de Carvajal (enfant brûlé) ?',a:'Apport = 2000 mL/m² SC + 5000 mL/m² de SCB. SC = (4×Poids+7)/(Poids+90).'},
+{q:'Quand débuter la nutrition entérale chez le brûlé grave ?',a:'Avant la 12e heure (< 12h). 25-30 Kcal/kg/jour avec contrôle glycémique strict.'},
+{q:'Qu\'est-ce que l\'escarrotomie ?',a:'Incision de l\'escarre cutanée créée par la brûlure de 3e degré pour lever la compression.'}
+],
+qcm:[
+{q:'Chez un enfant de 5 ans, une brûlure grave est définie par SCB :',opts:['> 20%','> 10%','> 5%','> 30%'],c:1,ex:'Brûlure grave chez enfant : SCB > 10%. Adulte : SCB > 20%. NRS : SCB > 5%.'},
+{q:'La formule de Baxter utilise comme soluté principal :',opts:['Sérum salé hypertonique','Colloïdes exclusivement','Ringer Lactate (cristalloïdes)','Sérum glucosé'],c:2,ex:'Formule de Baxter = Ringer Lactate (cristalloïdes) comme soluté de 1ère intention.'},
+{q:'Le SCA (Syndrome Compartimental Abdominal) est défini par :',opts:['PIA > 10 mmHg','PIA > 20 mmHg + au moins une défaillance d\'organe','Douleur abdominale + fièvre','SCB > 40% seulement'],c:1,ex:'SCA = PIA > 20 mmHg + au moins une NOUVELLE défaillance d\'organe. FDR : SCB > 40%, brûlure électrique.'}
+]},
+
+{id:'coma',icon:'😴',color:'#b794f4',title:'Coma',sub:'Définitions · Stades GCS · Étiologies · CAT',
+cours:[
+{t:'Définitions Essentielles',items:['Vigilance : état de réveil — ouverture yeux, réponse motrice, communication verbale','Conscience : connaissance de soi et du monde — discours cohérent, comportement adapté','Coma : Altération profonde et durable de conscience + vigilance, NON réversible par stimulation extérieure','Obnubilation : Ralentissement fonctions conscience + dégradation attention','Stupeur : réaction fugace d\'éveil aux stimuli nociceptifs avec réactivité motrice','État végétatif : comportement vigil sans activité consciente décelable']},
+{t:'Diagnostic Différentiel du Coma',items:['Hypersomnie : accès de sommeil réversible par stimulation (patient non confus)','Mutisme akinétique','Conversion hystérique : ECG + EEG normaux, respiration par bouche au pincement nez','Locked-in Syndrome : Thrombose tronc basilaire — tétraplégie + diplégie faciale, conscience INTACTE','État végétatif chronique : yeux ouverts + cycles veille/sommeil, ne parle pas, ne bouge pas']},
+{t:'4 Stades du Coma',fw:true,items:['Stade I (Vigil) : réaction d\'éveil aux stimulations douloureuses','Stade II : pas de réaction d\'éveil mais réactions motrices présentes','Stade III (Aréactif) : abolition totale des réflexes — Décortication ou Décérébration','Stade IV : absence totale vie de relation — mydriase aréflectique — réflexes tronc abolis']},
+{t:'Étiologies — Coma Traumatique & Infectieux',items:['Traumatique : Lésions axonales diffuses, HED, HSD, Contusions cérébrales','Infectieux : Méningite, Méningo-encéphalite, Abcès cérébral']},
+{t:'Étiologies — Toxique, Métabolique, Vasculaire',items:['Toxique : Anti-dépresseurs | Morphiniques (antidote = Naloxone) | Cyanure (antidote = Hydroxocobalamine) | BZD (antidote = Flumazénil)','Métabolique : Hypoglycémie +++, Hyponatrémie, Hypercalcémie','Vasculaire : Hémorragie méningée, AVC, Embolie gazeuse, HTA maligne','Anoxique : Épilepsie prolongée, Hypoglycémie, Arrêt ventilatoire, Inhalation fumées']},
+{t:'CAT Chez Patient Comateux',fw:true,items:['1. Mise en condition : PLS + libération VA + O₂ masque haut débit + Scope + VVP','2. Tt urgence : Hypoglycémie, Convulsions répétées, ATB si purpura, IOT+VM si nécessaire','3. Examens complémentaires : GDS, Iono, Urée, Créat, PL selon orientation','4. Tt étiologique : Neurochirurgie / Anti-œdème / Correction hydro-électrolytique / Antiépileptiques']}
+],
+fc:[
+{q:'Définition du coma ?',a:'Altération profonde et durable de la conscience et de la vigilance, non réversible par stimulation extérieure. Causé par atteinte du SRAA.'},
+{q:'GCS minimum = coma profond ?',a:'GCS ≤ 8 = Coma. GCS = 3/15 = coma stade IV (proche mort encéphalique).'},
+{q:'Antidote de la morphine ?',a:'Naloxone (Narcan). Antidote Cyanure = Hydroxocobalamine. Antidote BZD = Flumazénil.'},
+{q:'Différence Locked-in Syndrome vs Coma ?',a:'LIS : tétraplégie + diplégie faciale MAIS conscience INTACTE. Étiologie : thrombose tronc basilaire.'},
+{q:'4 stades du coma ?',a:'I=Vigil (douleur) | II=motricité présente | III=Aréactif (réflexes abolis) | IV=absence vie relation + mydriase.'},
+{q:'1ère cause métabolique à éliminer en urgence dans tout coma ?',a:'L\'Hypoglycémie +++ = cause la plus fréquente et la plus facile à traiter. Glycémie capillaire immédiate.'}
+],
+qcm:[
+{q:'Dans le Locked-in Syndrome, l\'étiologie principale est :',opts:['Hypoglycémie sévère','Thrombose du tronc basilaire / myélinolyse centro-pontine','Épilepsie post-comitale','Intoxication aux BZD'],c:1,ex:'LIS = Thrombose du tronc basilaire ou myélinolyse centro-pontine. Conscience intacte, tétraplégie + diplégie faciale.'},
+{q:'L\'antidote des morphiniques est :',opts:['Flumazénil','Hydroxocobalamine','Naloxone (Narcan)','N-acétylcystéine'],c:2,ex:'Naloxone (Narcan) = antidote morphiniques. Flumazénil = BZD. Hydroxocobalamine = Cyanure.'},
+{q:'La conversion hystérique se distingue du coma par :',opts:['GCS < 8','Mydriase aréflectique','Imagerie + EEG normaux + respiration par bouche au pincement nasal','Absence réponse à la douleur'],c:2,ex:'Conversion hystérique : imagerie et EEG normaux, résistance à l\'ouverture des yeux, respiration par bouche au pincement nasal.'}
+]},
+
+{id:'me',icon:'🕯️',color:'#718096',title:'Mort Encéphalique',sub:'Définition · Critères cliniques · Para-cliniques · Don d\'organes',
+cours:[
+{t:'Définition',fw:true,items:['ME = destruction irréversible et isolée de l\'ensemble des structures de l\'encéphale chez un sujet à CŒUR BATTANT','ME résulte d\'une ↑ progressive de la PIC → arrêt circulatoire encéphalique','ME entraîne des lésions cérébrales irréversibles MAIS il existe une activité cardiaque']},
+{t:'Étiologies & Mécanisme',items:['1. AVC vasculaire | 2. Traumatologie | 3. AVP | 4. Anoxie','Phase 1 HTA IC : Hypertonie parasympathique → tachycardie puis hypotension','Phase 2 Agonique terminale : Hypotonie sympathique','Phase 3 ME : Abolition complète tonus sym + parasymp']},
+{t:'Conséquences de la ME',items:['1. Hémodynamique : HTA puis hypotension, trouble de rythme','2. Diabète insipide : absence ADH → hypokaliémie, hyponatrémie, hypoglycémie','3. Ventilatoire : abolition de la ventilation spontanée','4. Hypothermie : perte 1-2°C/heure','5. Trouble de l\'hémostase']},
+{t:'3 Critères Cliniques de ME',fw:true,items:['1. Absence totale de conscience et d\'activité motrice spontanée : GCS = 3/15','2. Abolition de TOUS les réflexes du tronc cérébral','3. Abolition de la respiration spontanée (vérifiée par épreuve d\'hypercapnie)']},
+{t:'Épreuve d\'Hypercapnie',items:['Vérifier PaCO₂ = 35-40 mmHg','Oxygéner en O₂ pur pendant 20 min','Déconnecter respirateur 10 min (O₂ par sonde intra-trachéale)','Vérifier absence de tout mouvement thoracique','Test (+) si PaCO₂ > 60 mmHg + ABSENCE mouvements thoraciques']},
+{t:'Critères Para-Cliniques',items:['EEG : Examen de confirmation → tracé plat — réalisé au lit pendant 30 min','Angioscanner Cérébral : confirme arrêt circulatoire cérébral (image > 20 sec après injection)','Doppler Transcranien : permet de suspecter l\'arrêt (ne confirme pas)']},
+{t:'PEC Donneur d\'Organes & CI',fw:true,items:['Objectifs : FC 60-120, PAS > 100, PAM > 70, PVC 6-10, Diurèse 0,5-3 mL/kg/h, Hb > 10','CI prélèvement : VIH, VHC, VHB, TBC actif, Syphilis, Cancer évolué ou métastasé','Organes : Reins, Cœur, Foie, Poumons, Pancréas, Intestin, Tissus']}
+],
+fc:[
+{q:'Définition de la Mort Encéphalique ?',a:'Destruction irréversible et isolée de l\'ensemble des structures de l\'encéphale chez un sujet à CŒUR BATTANT.'},
+{q:'GCS de la mort encéphalique ?',a:'GCS = 3/15. Absence totale de conscience et d\'activité motrice spontanée.'},
+{q:'3 critères cliniques de ME ?',a:'① Absence conscience + activité motrice (GCS 3) ② Abolition réflexes tronc ③ Abolition respiration spontanée.'},
+{q:'Épreuve d\'hypercapnie — Test positif ?',a:'PaCO₂ > 60 mmHg + ABSENCE de tout mouvement thoracique après 10 min de déconnexion.'},
+{q:'Organes pouvant être prélevés en ME ?',a:'Reins — Cœur — Foie — Poumons — Pancréas — Intestin — Tissus.'},
+{q:'Conséquences hormonales de la ME ?',a:'Absence d\'ADH → Diabète insipide → Polyurie → Hypernatrémie, Hypokaliémie, Hypoglycémie.'}
+],
+qcm:[
+{q:'L\'épreuve d\'hypercapnie est positive si :',opts:['PaCO₂ > 45 + mouvements thoraciques présents','PaCO₂ > 60 mmHg + ABSENCE de mouvements thoraciques','PaCO₂ > 35 + SpO₂ < 90%','pH < 7.20 + apnée'],c:1,ex:'Test (+) = PaCO₂ > 60 mmHg après 10 min + absence de tout mouvement thoracique. Confirme l\'apnée.'},
+{q:'L\'examen paraclinique de CONFIRMATION de la ME est :',opts:['Scanner sans injection','Doppler transcranien','EEG (tracé plat) et/ou Angioscanner cérébral','IRM cérébrale'],c:2,ex:'EEG tracé plat = confirmation. Angioscanner = confirme arrêt circulatoire cérébral. Doppler = suspicion seulement.'},
+{q:'Un patient en ME présente polyurie + hypernatrémie. Cause ?',opts:['Insuffisance rénale','Diabète insipide par absence d\'ADH','Surcharge remplissage','Hypercalcémie'],c:1,ex:'ME → absence ADH → Diabète insipide central → polyurie hypotone → Hypernatrémie, Hypokaliémie, Hypoglycémie.'}
+]},
+
+{id:'douleur',icon:'💊',color:'#f6ad55',title:'Douleur & Analgésie Post-op',sub:'Évaluation EVA · Paliers · Morphiniques · ACP · ALR',
+cours:[
+{t:'Définitions',items:['Analgésie : traitement de la douleur','Douleur : Expérience sensorielle + émotionnelle désagréable liée à un dommage tissulaire réel ou potentiel','Post-opératoire : Après 24-48h après l\'intervention']},
+{t:'Obligations (Morale, Médicale, Légale)',items:['Conséquences viscérales : Tachycardie, HTA, Agitation, Hyperglycémie, IDM, Encombrement bronchique','Effets négatifs : Réponse physiologique (respiratoire, cardio, neuro-endocrinienne), Chronicisation','Conséquences réhabilitation : Digestive, Motricité, Risque infectieux']},
+{t:'Évaluation de la Douleur',fw:true,items:['Auto-évaluation : EVS (0-10), EN (0-10), EVS Simple (0-4)','Hétéro-évaluation : ECPA (4 composantes, score 0-32), Doloplus-2','EVA < 30 mm = Douleur FAIBLE (Circoncision, Curetage, Chir. ophtalmologique)','EVA 30-60 mm = Douleur MODÉRÉE (Appendicectomie, Mastectomie, ORL, Neurochirurgicale)','EVA > 60 mm = Douleur FORTE (Césarienne, Thoracotomie, Chir. rénale, Laparotomie)']},
+{t:'Principes Généraux PEC',items:['1. Évaluation = pierre angulaire','2. Titration : débuter si EVA ≥ 3/10 → objectif EVA < 3/10','3. Analgésie multimodale = RÈGLE','4. Traçabilité = clé continuité des soins']},
+{t:'A. Morphiniques — Titration SSPI',fw:true,items:['Titration IV : bolus de 1 mg toutes 5-10 min → Relai SC 2h après titration','Morphine = principale molécule antalgique en clinique (efficacité dose-dépendante)','ACP : bolus 1 mg. Sujet âgé : Dose 24h = (100 - Âge) mg','EI : Nausées, vomissements, risque dépression respiratoire','Antagonisation (Narcan) : Bolus 0,04-0,1 mg/2-3 min si dépression respiratoire','Morphine intrathécale : à faible dose (0,1 mg) par 24 heures']},
+{t:'B. Autres Antalgiques',items:['Tramadol : ↓ recapture monoamines + agoniste µ — après douleur modérée','AINS : évaluation rénale préop obligatoire — CI si clairance < 30 mL/min','Paracétamol : Adulte 1g × 4/jr | Enfant 15 mg/kg × 4/jr | EI : hépatotoxicité','Néfopam : inhibiteur recapture monoamines — anti-hyperalgésique','ALR (Blocs plexiques) : participe à la réhabilitation et ↓ durée de séjour']}
+],
+fc:[
+{q:'Valeurs EVA pour les 3 niveaux de douleur ?',a:'Faible : EVA < 30 mm | Modérée : 30-60 mm | Forte : > 60 mm.'},
+{q:'Formule ACP chez sujet âgé ?',a:'Dose totale 1ère 24h = (100 - Âge) mg. Ex : 70 ans → 30 mg maximum/24h.'},
+{q:'Antidote des morphiniques + posologie ?',a:'Naloxone (Narcan) : Bolus 0,04 à 0,1 mg toutes 2-3 min. Stimuler + O₂ en premier.'},
+{q:'CI aux AINS ?',a:'Clairance créatinine < 30 mL/min. Évaluation préopératoire rénale obligatoire.'},
+{q:'Posologie Paracétamol ?',a:'Adulte : 1g × 4/jr (max 4g/jour). Enfant : 15 mg/kg × 4/jr. EI = Toxicité hépatique.'},
+{q:'Principe de l\'Analgésie Multimodale ?',a:'Associer molécules ayant mécanismes différents (Paracétamol + AINS + Morphine + Néfopam ± ALR) pour ↓ doses et EI.'}
+],
+qcm:[
+{q:'La posologie du Paracétamol chez l\'adulte est :',opts:['500 mg × 4/jr','1g × 4/jr (max 4g/jour)','2g × 2/jr','1g × 2/jr'],c:1,ex:'Paracétamol adulte = 1g × 4/jr, max 4g/jour. Réduire si insuffisance hépatique.'},
+{q:'La titration morphinique en SSPI débute :',opts:['EVA > 7/10','EVA ≥ 3/10 avec objectif EVA < 3/10','Uniquement si le patient demande','Toujours après 6h post-op'],c:1,ex:'Titration morphinique débute si EVA ≥ 3/10 → objectif EVA < 3/10. Bolus de 1 mg toutes 5-10 min.'},
+{q:'La formule ACP pour un patient de 75 ans donne une dose max de :',opts:['75 mg/24h','35 mg/24h','25 mg/24h','100 mg/24h'],c:2,ex:'Dose 24h = (100 - 75) = 25 mg. Règle simple pour adapter la morphine au sujet âgé.'}
+]},
+
+{id:'noyade',icon:'🌊',color:'#76e4f7',title:'Noyade',sub:'3e cause décès · 2 types · 4 stades · PEC',
+cours:[
+{t:'Définition & Contexte',items:['Noyade = asphyxie aiguë par inondation broncho-alvéolaire consécutive à immersion/submersion','3e cause de décès accidentel dans le monde (après AVP et Brûlures)','Urgence respiratoire ET cardio-circulatoire']},
+{t:'2 Types de Noyade',fw:true,items:['Noyade Asphyxique (90%) = vraie/primitive : inondation VAS AVANT perte de conscience','Circonstances : maison (baignoires), piscines privées, tentative suicide, cours de naufrage','Noyade Syncopale (10%) = secondaire : inondation APRÈS perte de conscience','Causes : Épilepsie (CI natation), Tétanie, Hypoglycémie, Syncopes laryngées, Allergie, AVC']},
+{t:'Physiopathologie — Phases',fw:true,schema:`Submersion → Pénétration petite qté d\'eau dans trachée<br><br>
+<span class="ar">↙15%</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ar">↘85%</span><br>
+<span class="kw">Spasme laryngé + apnée réflexe</span><br><br>
+→ 15% : Spasme persiste → <strong>Noyade à poumons secs</strong><br>
+→ 85% : Reprise respiratoire → Inondation broncho-alvéolaire → Arrêt Respiratoire → Arrêt Circulatoire`},
+{t:'4 Stades Cliniques',fw:true,table:{headers:['Stade','Conscience','Respiration','Circulation'],rows:[['1 — Aqua Stress','Normale','Normale','Normale (tachycardie)'],['2 — Petite Hypoxie','Normale ± agitation','Perturbée (toux, cyanose)','Normale'],['3 — Grande Hypoxie','Altérée (coma réactif)','IRA sévère + cyanose','± Conservée'],['4 — Anoxique','Inefficace (coma+mydraise)','Inefficace (gasps)','Inefficace']]}},
+{t:'Influence Nature de l\'Eau',items:['Eau douce (hypotonique) : hémodilution, hyponatrémie, troubles rythme, OAP surcharge + lésionnel','Eau de mer (hypertonique) : hémoconcentration, hypernatrémie, OAP lésionnel +++']},
+{t:'CAT par Stade',items:['Stade 1 : Rassurer, réchauffer, sécher → Hospitaliser (risque OAP secondaire + hypothermie)','Stade 2 : O₂ 15 L/min, VVP + sonde gastrique, transport médicalisé','Stade 3 : Libération VAS + O₂ HC, 2 VVP, sonde nasogastrique, diurétique si œdème, Catécholamines si choc','Stade 4 : O₂ 15L + MCE + IOT + VM assistée + Réa circulatoire (MCE, Adrénaline, CEE)']}
+],
+fc:[
+{q:'Définition de la noyade ?',a:'Asphyxie aiguë par inondation broncho-alvéolaire consécutive à une immersion ou submersion. Urgence respiratoire et circulatoire.'},
+{q:'2 types de noyade ?',a:'Asphyxique (90%) = inondation VAS avant perte conscience. Syncopale (10%) = inondation APRÈS perte de conscience.'},
+{q:'Geste à ÉVITER chez un noyé ?',a:'La manœuvre d\'Heimlich est contre-indiquée. Ne pas nécessairement aspirer l\'eau des poumons.'},
+{q:'PEC Stade 4 (noyade anoxique) ?',a:'O₂ insufflé 15L, MCE, IOT + VM assistée + Réanimation circulatoire (MCE, Adrénaline, CEE). Monitorage.'},
+{q:'Facteur pronostique principal de la noyade ?',a:'Durée de submersion (principal). Eau froide est protectrice (hypothermie). + GCS initial + rapidité secours.'},
+{q:'Différence OAP eau douce vs eau de mer ?',a:'Eau douce : OAP surcharge + lésionnel (hypotonique → entre dans vaisseaux). Eau de mer : OAP lésionnel +++ (hypertonique → sort des vaisseaux).'}, 
+{q:'Noyade syncopale — étiologies ?',a:'Épilepsie (CI natation), Tétanie, Hypoglycémie, Syncopes laryngées/rhinopharyngées, Allergies, AVC.'}
+],
+qcm:[
+{q:'Le stade 3 de la noyade est caractérisé par :',opts:['Conscience normale, respiration normale','Conscience normale ± agitation, respiration perturbée','Conscience altérée (coma réactif), IRA, cyanose, circulation ± conservée','Arrêt cardio-respiratoire'],c:2,ex:'Stade 3 (Grande Hypoxie) : Conscience altérée (coma réactif), IRA avec dyspnée + cyanose, circulation ± conservée.'},
+{q:'Dans une noyade en eau douce, on s\'attend à :',opts:['Hypernatrémie + hémoconcentration','Hyponatrémie + hémodilution + OAP de surcharge','Hypernatrémie + OAP lésionnel uniquement','Aucun trouble électrolytique'],c:1,ex:'Eau douce hypotonique → passe dans les vaisseaux → hémodilution, hyponatrémie, OAP de surcharge + lésionnel.'},
+{q:'La manœuvre d\'Heimlich chez un noyé est :',opts:['Obligatoire en premier geste','Contre-indiquée','Indiquée si inhalation de fumée associée','Réservée aux nourrissons'],c:1,ex:'Manœuvre d\'Heimlich CONTRE-INDIQUÉE chez le noyé. Ne pas aspirer l\'eau des poumons. Priorité = MCE si ACR.'}
+]},
+
+{id:'acido',icon:'⚗️',color:'#68d391',title:'Troubles Acido-Basiques',sub:'pH · Tampons · Henderson-Hasselbalch · Gazométrie en 5 étapes',
+cours:[
+{t:'Généralités',items:['PH normal = 7,40 ± 0,02 (entre 7,38 et 7,42)','PH < 7 ou > 7,8 = incompatible avec la vie','PH intracellulaire est acide par rapport au plasma','Rôle dans : Cardiovasculaire, Neurologique, Respiratoire, Métabolique']},
+{t:'3 Mécanismes de Régulation',items:['1. Systèmes tampons : fixent ions H⁺ — limitent variations PH','   Intracellulaires : Protéines, Hémoglobine, Ions phosphates','   Extracellulaires : Système bicarbonate (H₂CO₃)','2. Ventilation : Ajuste PH par H⁺ et PaCO₂ via chémorécepteurs aortiques/carotidiens','3. Rein : Excrétion/absorption H⁺ + régulation HCO₃⁻']},
+{t:'4 Types de Troubles — Classification',fw:true,schema:`<span class="dk">ACIDOSE</span> <span class="ar">←</span> <strong>Respiratoire</strong> : ↑ PaCO₂ (↓ ventilation alvéolaire)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="ar">←</span> <strong>Métabolique</strong> : ↓ HCO₃⁻ (BE négatif)<br><br>
+<span class="kw">ALCALOSE</span> <span class="ar">←</span> <strong>Respiratoire</strong> : ↓ PaCO₂ (hyperventilation)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="ar">←</span> <strong>Métabolique</strong> : ↑ HCO₃⁻ (BE positif)<br><br>
+<span class="wk">BE nul</span> = physio | <span class="dk">BE(-)</span> = Acidose métabo | <span class="kw">BE(+)</span> = Alcalose métabo`},
+{t:'Acidose Respiratoire',items:['Due à ↓ ventilation alvéolaire → accumulation CO₂','Étiologies : Dépression respiratoire, ↑ résistances VA, Obésité','Caractéristiques : ↓ PH + ↑ PaCO₂ + ↑ bicarbonates (compensation)']},
+{t:'Acidose Métabolique',items:['Entrée H⁺ > élimination H⁺','Étiologies : Acidose lactique (état de choc), Acidocétose diabétique, Diarrhée','Caractéristiques : ↓ PH + ↓ HCO₃⁻ + BE négatif','Effets sys : ↓ Contractilité myocardique, Arythmies, Vasoconstriction pulmonaire']},
+{t:'Alcalose Respiratoire',items:['Résultat de l\'hyperventilation → ↓ PaCO₂','Étiologies : OAP, Asthme, Stress, Douleur, Anémie, Altitude','Caractéristiques : ↑ PH + ↑ Bicarbonates + ↓ PaCO₂']},
+{t:'Algorithme Gazométrie — 5 Étapes',fw:true,items:['Étape 1 : Analyser le PH (Acidose < 7,38 / Alcalose > 7,42)','Étape 2 : Analyser la PaCO₂ (Normal 35-45 mmHg)','Étape 3 : Excès de base BE (nul = physio / négatif = acidose / positif = alcalose)','Étape 4 : Évaluation de la compensation (primaire et mixtes)','Étape 5 : Analyse du trou anionique et du trou osmolaire']}
+],
+fc:[
+{q:'Valeur normale du PH sanguin ?',a:'PH normal = 7,40 ± 0,02 (entre 7,38 et 7,42). PH < 7 ou > 7,8 = incompatible avec la vie.'},
+{q:'Caractéristiques gazométriques de l\'acidose métabolique ?',a:'↓ PH + ↓ HCO₃⁻ + BE négatif. Compensation respiratoire possible : hyperventilation (↓ PaCO₂).'},
+{q:'Étiologies de l\'alcalose métabolique ?',a:'Vomissements, Diurétiques, Aspiration gastrique → perte de H⁺ → ↑ HCO₃⁻.'},
+{q:'Signification du Base Excess (BE) ?',a:'BE nul = physiologique. BE(-) = Acidose métabolique. BE(+) = Alcalose métabolique.'},
+{q:'5 étapes d\'interprétation d\'une gazométrie ?',a:'① PH ② PaCO₂ ③ Excès de base ④ Compensation ⑤ Trou anionique et osmolaire.'},
+{q:'Effet de l\'acidose sur le système cardiovasculaire ?',a:'↓ Contractilité myocardique, Arythmies, Vasoconstriction pulmonaire, Vasodilatation artérielle périphérique.'}
+],
+qcm:[
+{q:'GDS : PH=7.28, PaCO₂=55, HCO₃⁻=25. Trouble ?',opts:['Acidose métabolique','Acidose respiratoire','Alcalose métabolique','Alcalose respiratoire'],c:1,ex:'PH ↓ (acidose) + PaCO₂ ↑ (↑ CO₂) + HCO₃⁻ normal → Acidose RESPIRATOIRE non compensée.'},
+{q:'GDS : PH=7.50, PaCO₂=30, HCO₃⁻=23. Trouble ?',opts:['Alcalose métabolique','Alcalose respiratoire','Acidose métabolique compensée','Trouble mixte'],c:1,ex:'PH ↑ (alcalose) + PaCO₂ ↓ (↓ CO₂ par hyperventilation) + HCO₃⁻ normal → Alcalose RESPIRATOIRE.'},
+{q:'L\'étiologie principale de l\'acidose lactique est :',opts:['Vomissements répétés','Hypoxie tissulaire (état de choc)','Diurétiques','Altitude'],c:1,ex:'Acidose lactique = hypoxie tissulaire → métabolisme anaérobie → production lactate. Principal contexte = état de choc.'}
+]}
+];
+
+// ═══════════════════════════ STATE ═══════════════════════════
+let S={cur:null,tab:'cours',fc:{idx:0,flipped:false},qcm:{ans:{},ok:0,tot:0},gcs:{e:0,v:0,m:0},gtot:0,gok:0};
+
+// ═══════════════════════════ BUILD GRID ═══════════════════════
+function buildGrid(){
+  const g=document.getElementById('cgrid');
+  C.forEach((c,i)=>{
+    const el=document.createElement('div');
+    el.className='ccard';el.id='cc-'+c.id;
+    el.style.setProperty('--cc',c.color);
+    el.innerHTML=`<span class="ccard-icon">${c.icon}</span><div class="ccard-num">MODULE ${String(i+1).padStart(2,'0')}</div><div class="ccard-title">${c.title}</div><div class="ccard-prog"><div class="ccard-prog-f" id="cp-${c.id}"></div></div>`;
+    el.onclick=()=>open(c.id);
+    g.appendChild(el);
+  });
+}
+
+// ═══════════════════════════ OPEN COURSE ═══════════════════════
+function open(id){
+  const c=C.find(x=>x.id===id);if(!c)return;
+  S.cur=id;S.tab='cours';S.fc={idx:0,flipped:false};S.qcm={ans:{},ok:0,tot:0};S.gcs={e:0,v:0,m:0};
+  document.querySelectorAll('.ccard').forEach(x=>x.classList.remove('active'));
+  document.getElementById('cc-'+id)?.classList.add('active');
+  document.getElementById('empty').style.display='none';
+  const m=document.getElementById('main');m.style.display='block';
+  document.getElementById('chIcon').textContent=c.icon;
+  document.getElementById('chTitle').textContent=c.title;
+  document.getElementById('chSub').textContent=c.sub;
+  // Build tabs
+  const tabs=['cours','flashcards','qcm'];
+  const tl={'cours':'📖 Cours','flashcards':'🃏 Flashcards','qcm':'✅ QCM'};
+  const tb=document.getElementById('tabs');tb.innerHTML='';
+  tabs.forEach(t=>{
+    const b=document.createElement('button');
+    b.className='tbtn'+(t==='cours'?' active':'');b.dataset.t=t;
+    b.textContent=tl[t];b.onclick=()=>switchTab(t);tb.appendChild(b);
+  });
+  renderAll(c);
+  m.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function switchTab(t){
+  S.tab=t;
+  document.querySelectorAll('.tbtn').forEach(b=>b.classList.toggle('active',b.dataset.t===t));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.dataset.t===t));
+}
+
+// ═══════════════════════════ RENDER ALL ═══════════════════════
+function renderAll(c){
+  const p=document.getElementById('panels');p.innerHTML='';
+  p.appendChild(buildCoursPanel(c));
+  p.appendChild(buildFCPanel(c));
+  p.appendChild(buildQCMPanel(c));
+}
+
+// ─── COURS ───
+function buildCoursPanel(c){
+  const p=mk('div','panel active');p.dataset.t='cours';
+  let h='<div class="cgr">';
+  c.cours.forEach(sec=>{
+    const fw=sec.fw?' fw':'';
+    h+=`<div class="cb${fw}"><div class="bt" style="--a1:${C.find(x=>x.id===c.id).color}">${sec.t}</div>`;
+    if(sec.schema) h+=`<div class="schema">${sec.schema}</div>`;
+    if(sec.table){
+      h+='<div style="overflow-x:auto"><table class="stbl"><thead><tr>'+sec.table.headers.map(x=>`<th>${x}</th>`).join('')+'</tr></thead><tbody>';
+      sec.table.rows.forEach(r=>{ h+='<tr>'+r.map(x=>`<td>${x}</td>`).join('')+'</tr>'; });
+      h+='</tbody></table></div>';
+    }
+    if(sec.items) h+='<ul class="il">'+sec.items.map(x=>`<li>${x}</li>`).join('')+'</ul>';
+    h+='</div>';
+  });
+  // GCS calculator for TC
+  if(c.id==='tc'){
+    h+=`</div><div class="cb fw" style="margin-bottom:.9rem">
+<div class="bt" style="--a1:#b794f4">🧮 Calculateur GCS Interactif</div>
+<div class="gcs-grid">
+  <div class="gcs-sec"><div class="gcs-stit">Ouverture des yeux (E)</div>
+    ${[['Spontanée',4],['Au bruit',3],['À la douleur',2],['Absente',1]].map(([l,s])=>`<div class="gcs-row" onclick="gcsSet('e',${s},this)"><span>${l}</span><span class="gcs-badge">${s}</span></div>`).join('')}
+  </div>
+  <div class="gcs-sec"><div class="gcs-stit">Réponse verbale (V)</div>
+    ${[['Orientée',5],['Confuse',4],['Inappropriée',3],['Incompréhensible',2],['Absente',1]].map(([l,s])=>`<div class="gcs-row" onclick="gcsSet('v',${s},this)"><span>${l}</span><span class="gcs-badge">${s}</span></div>`).join('')}
+  </div>
+  <div class="gcs-sec"><div class="gcs-stit">Réponse motrice (M)</div>
+    ${[['Obéit',6],['Adaptée',5],['Orientée',4],['Flexion réflexe',3],['Extension réflexe',2],['Absente',1]].map(([l,s])=>`<div class="gcs-row" onclick="gcsSet('m',${s},this)"><span>${l}</span><span class="gcs-badge">${s}</span></div>`).join('')}
+  </div>
+</div>
+<div class="gcs-total" id="gcsTot"><div class="gcs-num" id="gcsNum">—</div><div class="gcs-lbl" id="gcsLbl">Sélectionnez les critères</div></div>
+</div><div class="cgr">`;
+  }
+  h+='</div>';
+  p.innerHTML=h;return p;
+}
+
+// ─── FLASHCARDS ───
+function buildFCPanel(c){
+  const p=mk('div','panel');p.dataset.t='flashcards';
+  const cards=c.fc;
+  p.innerHTML=`
+<div class="fc-wrap">
+  <div class="fc" id="fcCard" onclick="fcFlip()">
+    <div class="fc-face fc-front"><div class="fc-lbl">❓ QUESTION</div><div class="fc-q" id="fcQ">${cards[0].q}</div><div class="fc-hint">Cliquez pour révéler la réponse</div></div>
+    <div class="fc-face fc-back"><div class="fc-lbl">✅ RÉPONSE</div><div class="fc-a" id="fcA">${cards[0].a}</div></div>
+  </div>
+</div>
+<div class="fc-nav">
+  <button class="btn btn-sec" onclick="fcPrev()">← Préc.</button>
+  <span class="fc-ctr" id="fcCtr">1 / ${cards.length}</span>
+  <button class="btn btn-sec" onclick="fcNext()">Suiv. →</button>
+</div>
+<div class="fc-btns">
+  <button class="btn btn-ok" onclick="fcMark(true)">✓ Je sais</button>
+  <button class="btn btn-ko" onclick="fcMark(false)">✗ À revoir</button>
+</div>
+<div style="margin-top:.9rem;text-align:center;font-size:.65rem;color:var(--mt)">${cards.length} cartes au total · Cliquez pour retourner</div>`;
+  return p;
+}
+
+// ─── QCM ───
+function buildQCMPanel(c){
+  const p=mk('div','panel');p.dataset.t='qcm';
+  const qs=c.qcm;
+  let h=`<div class="qcm-hd">
+<span>Score QCM</span><span class="qcm-score-n" id="qScore">0</span><span>/ ${qs.length}</span>
+<div style="flex:1;height:3px;background:var(--s3);border-radius:2px;margin-left:9px;overflow:hidden"><div id="qBar" style="height:100%;width:0%;background:linear-gradient(90deg,var(--a3),var(--a1));border-radius:2px;transition:width .4s"></div></div>
+<button class="btn btn-sec" style="margin-left:auto;font-size:.65rem;padding:5px 11px" onclick="resetQCM()">↺ Reset</button>
+</div><div class="qcm-list">`;
+  qs.forEach((q,qi)=>{
+    h+=`<div class="qblock" id="qb${qi}"><div class="q-txt"><strong style="color:var(--a1);font-style:normal">Q${qi+1}.</strong> ${q.q}</div><div class="q-opts">`;
+    q.opts.forEach((o,oi)=>{
+      h+=`<div class="q-opt" id="o${qi}_${oi}" onclick="qAnswer(${qi},${oi})"><span class="opt-lt">${['A','B','C','D'][oi]}</span><span>${o}</span></div>`;
+    });
+    h+=`</div><div class="q-fb" id="fb${qi}"></div></div>`;
+  });
+  h+='</div>';p.innerHTML=h;return p;
+}
+
+// ═══════════════════════════ GCS ═══════════════════════════
+window.gcsSet=function(type,score,el){
+  el.closest('.gcs-sec').querySelectorAll('.gcs-row').forEach(r=>r.classList.remove('sel'));
+  el.classList.add('sel');S.gcs[type]=score;
+  const t=S.gcs.e+S.gcs.v+S.gcs.m;
+  const n=document.getElementById('gcsNum'),l=document.getElementById('gcsLbl');
+  if(!n)return;
+  if(S.gcs.e&&S.gcs.v&&S.gcs.m){
+    n.textContent=t+'/15';
+    n.className='gcs-num '+(t<=8?'c-sev':t<=12?'c-mod':'c-ok');
+    l.textContent=t<=8?'🔴 Coma grave → IOT + Ventilation immédiate':t<=12?'🟡 Surveillance neurologique renforcée':'🟢 État de conscience satisfaisant';
+  }
+};
+
+// ═══════════════════════════ FLASHCARDS ═══════════════════════
+window.fcFlip=function(){
+  S.fc.flipped=!S.fc.flipped;
+  document.getElementById('fcCard')?.classList.toggle('flipped',S.fc.flipped);
+};
+window.fcNext=function(){
+  const c=C.find(x=>x.id===S.cur);if(!c)return;
+  S.fc.idx=(S.fc.idx+1)%c.fc.length;updFC(c.fc);
+};
+window.fcPrev=function(){
+  const c=C.find(x=>x.id===S.cur);if(!c)return;
+  S.fc.idx=(S.fc.idx-1+c.fc.length)%c.fc.length;updFC(c.fc);
+};
+window.fcMark=function(k){
+  notif(k?'✓ Excellent !':'📌 Ajouté à revoir',k?'ok':'ko');
+  window.fcNext();
+};
+function updFC(cards){
+  S.fc.flipped=false;
+  document.getElementById('fcCard')?.classList.remove('flipped');
+  const q=document.getElementById('fcQ'),a=document.getElementById('fcA'),ctr=document.getElementById('fcCtr');
+  if(q)q.textContent=cards[S.fc.idx].q;
+  if(a)a.textContent=cards[S.fc.idx].a;
+  if(ctr)ctr.textContent=`${S.fc.idx+1} / ${cards.length}`;
+}
+
+// ═══════════════════════════ QCM ═══════════════════════════
+window.qAnswer=function(qi,oi){
+  const c=C.find(x=>x.id===S.cur);if(!c)return;
+  if(S.qcm.ans[qi]!==undefined)return;
+  S.qcm.ans[qi]=oi;
+  const q=c.qcm[qi];const ok=oi===q.c;
+  q.opts.forEach((_,idx)=>{
+    const el=document.getElementById(`o${qi}_${idx}`);if(!el)return;
+    el.classList.add('answered');
+    if(idx===q.c)el.classList.add(ok&&idx===oi?'correct':'rev-ok');
+    else if(idx===oi)el.classList.add('wrong');
+  });
+  const fb=document.getElementById('fb'+qi);
+  if(fb){fb.className='q-fb show '+(ok?'ok':'ko');fb.innerHTML=(ok?'✅ Correct ! ':'❌ Incorrect. ')+q.ex;}
+  // score
+  const done=Object.keys(S.qcm.ans).length;
+  const cor=Object.entries(S.qcm.ans).filter(([i,a])=>a===c.qcm[+i]?.c).length;
+  const se=document.getElementById('qScore'),be=document.getElementById('qBar');
+  if(se)se.textContent=cor;if(be)be.style.width=(done/c.qcm.length*100)+'%';
+  S.gtot++;if(ok)S.gok++;
+  document.getElementById('gScore').textContent=`Score: ${S.gok} / ${S.gtot}`;
+  document.getElementById('gProg').style.width=Math.min(S.gtot*4,100)+'%';
+  notif(ok?'✅ Bonne réponse !':'❌ Mauvaise réponse',ok?'ok':'ko');
+};
+
+window.resetQCM=function(){
+  S.qcm={ans:{},ok:0,tot:0};
+  const c=C.find(x=>x.id===S.cur);if(!c)return;
+  const panels=document.getElementById('panels');
+  const old=panels.querySelector('[data-t="qcm"]');
+  const np=buildQCMPanel(c);
+  if(old)panels.replaceChild(np,old);
+  switchTab('qcm');
+};
+
+// ═══════════════════════════ HELPERS ═══════════════════════════
+function mk(tag,cls){const e=document.createElement(tag);if(cls)e.className=cls;return e;}
+let nTimer;
+function notif(msg,type='ok'){
+  const el=document.getElementById('notif');
+  el.textContent=msg;el.className=`notif ${type} show`;
+  clearTimeout(nTimer);nTimer=setTimeout(()=>el.classList.remove('show'),2200);
+}
+
+// INIT
+buildGrid();
+</script>
+</body>
+</html>
